@@ -22,7 +22,7 @@ pub unsafe extern "C" fn hachimi_init(vtable: *const Vtable, version: i32) -> In
     if !success { return InitResult::Error };
 
     if let Some(_) = PLUGIN.get() {
-        log("UmaSpy v0.1.0");
+        log("UmaSpy v0.2.0");
     } else { return InitResult::Error }
 
     InitResult::Ok
