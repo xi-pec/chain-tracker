@@ -1,0 +1,12 @@
+[package]
+name = "umaspy"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+os_pipe = "1.2.3"
+paste = "1.0.15"
+winapi = { version = "0.3.9", features = ["consoleapi", "wincon", "fileapi", "winbase", "handleapi", "winnt", "processenv", "memoryapi"] }
