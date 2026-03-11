@@ -29,7 +29,7 @@ for paramcount in range(10):
         init = generate_hookinit(paramcount, id)
         inits.append(init)
 
-    hookinit = f"pool.available.insert(0, vec![\n{",\n".join(inits)}\n        ]);"
+    hookinit = f"pool.available.insert({paramcount}, vec![\n{",\n".join(inits)}\n        ]);"
     hookinits.append(hookinit)
 
 with open("template.rs") as t:

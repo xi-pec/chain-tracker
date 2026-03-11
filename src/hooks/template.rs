@@ -2,6 +2,7 @@ use crate::define_hook;
 use crate::define_hook_copy;
 use crate::types::*;
 use crate::vtable::VTABLE;
+use crate::plugin::PLUGIN;
 use crate::hooks::macros::get_hachimi_and_interceptor;
 
 use std::ffi::c_void;

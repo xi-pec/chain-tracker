@@ -2,6 +2,7 @@ use crate::define_hook;
 use crate::define_hook_copy;
 use crate::types::*;
 use crate::vtable::VTABLE;
+use crate::plugin::PLUGIN;
 use crate::hooks::macros::get_hachimi_and_interceptor;
 
 use std::ffi::c_void;
@@ -127,7 +128,7 @@ pub struct HookData {
 
 pub struct HookPool {
     pub available: HashMap<i32, Vec<HookData>>,
-    pub busy: HashMap<HookData, *mut Method>
+    pub busy: HashMap<HookData, *mut MethodInfo>
 }
 
 impl HookPool {
@@ -150,7 +151,7 @@ impl HookPool {
             HookData { addr: hook0_9 as *mut c_void, param_count: 0 }
         ]);
 
-        pool.available.insert(0, vec![
+        pool.available.insert(1, vec![
             HookData { addr: hook1_0 as *mut c_void, param_count: 1 },
             HookData { addr: hook1_1 as *mut c_void, param_count: 1 },
             HookData { addr: hook1_2 as *mut c_void, param_count: 1 },
@@ -163,7 +164,7 @@ impl HookPool {
             HookData { addr: hook1_9 as *mut c_void, param_count: 1 }
         ]);
 
-        pool.available.insert(0, vec![
+        pool.available.insert(2, vec![
             HookData { addr: hook2_0 as *mut c_void, param_count: 2 },
             HookData { addr: hook2_1 as *mut c_void, param_count: 2 },
             HookData { addr: hook2_2 as *mut c_void, param_count: 2 },
@@ -176,7 +177,7 @@ impl HookPool {
             HookData { addr: hook2_9 as *mut c_void, param_count: 2 }
         ]);
 
-        pool.available.insert(0, vec![
+        pool.available.insert(3, vec![
             HookData { addr: hook3_0 as *mut c_void, param_count: 3 },
             HookData { addr: hook3_1 as *mut c_void, param_count: 3 },
             HookData { addr: hook3_2 as *mut c_void, param_count: 3 },
@@ -189,7 +190,7 @@ impl HookPool {
             HookData { addr: hook3_9 as *mut c_void, param_count: 3 }
         ]);
 
-        pool.available.insert(0, vec![
+        pool.available.insert(4, vec![
             HookData { addr: hook4_0 as *mut c_void, param_count: 4 },
             HookData { addr: hook4_1 as *mut c_void, param_count: 4 },
             HookData { addr: hook4_2 as *mut c_void, param_count: 4 },
@@ -202,7 +203,7 @@ impl HookPool {
             HookData { addr: hook4_9 as *mut c_void, param_count: 4 }
         ]);
 
-        pool.available.insert(0, vec![
+        pool.available.insert(5, vec![
             HookData { addr: hook5_0 as *mut c_void, param_count: 5 },
             HookData { addr: hook5_1 as *mut c_void, param_count: 5 },
             HookData { addr: hook5_2 as *mut c_void, param_count: 5 },
@@ -215,7 +216,7 @@ impl HookPool {
             HookData { addr: hook5_9 as *mut c_void, param_count: 5 }
         ]);
 
-        pool.available.insert(0, vec![
+        pool.available.insert(6, vec![
             HookData { addr: hook6_0 as *mut c_void, param_count: 6 },
             HookData { addr: hook6_1 as *mut c_void, param_count: 6 },
             HookData { addr: hook6_2 as *mut c_void, param_count: 6 },
@@ -228,7 +229,7 @@ impl HookPool {
             HookData { addr: hook6_9 as *mut c_void, param_count: 6 }
         ]);
 
-        pool.available.insert(0, vec![
+        pool.available.insert(7, vec![
             HookData { addr: hook7_0 as *mut c_void, param_count: 7 },
             HookData { addr: hook7_1 as *mut c_void, param_count: 7 },
             HookData { addr: hook7_2 as *mut c_void, param_count: 7 },
@@ -241,7 +242,7 @@ impl HookPool {
             HookData { addr: hook7_9 as *mut c_void, param_count: 7 }
         ]);
 
-        pool.available.insert(0, vec![
+        pool.available.insert(8, vec![
             HookData { addr: hook8_0 as *mut c_void, param_count: 8 },
             HookData { addr: hook8_1 as *mut c_void, param_count: 8 },
             HookData { addr: hook8_2 as *mut c_void, param_count: 8 },
@@ -254,7 +255,7 @@ impl HookPool {
             HookData { addr: hook8_9 as *mut c_void, param_count: 8 }
         ]);
 
-        pool.available.insert(0, vec![
+        pool.available.insert(9, vec![
             HookData { addr: hook9_0 as *mut c_void, param_count: 9 },
             HookData { addr: hook9_1 as *mut c_void, param_count: 9 },
             HookData { addr: hook9_2 as *mut c_void, param_count: 9 },
@@ -270,7 +271,7 @@ impl HookPool {
         pool
     }
 
-    pub fn list(&self) -> Vec<(&HookData, &*mut Method)> {
+    pub fn list(&self) -> Vec<(&HookData, &*mut MethodInfo)> {
         let mut hooked = Vec::new();
 
         for data in &self.busy {
@@ -280,7 +281,7 @@ impl HookPool {
         hooked
     }
 
-    pub fn allocate(&mut self, method: *mut Method, param_count: i32) -> Option<HookData> {
+    pub fn allocate(&mut self, method: *mut MethodInfo, param_count: i32) -> Option<HookData> {
         if let Some(pool) = self.available.get_mut(&param_count) {
             if let Some(hook) = pool.pop() {
                 self.busy.insert(hook, method);

@@ -1,7 +1,7 @@
 use crate::plugin::PLUGIN;
 use crate::console::log;
 
-use std::ffi::{CStr};
+use std::ffi::CStr;
 
 pub unsafe fn list() {
     let plugin = PLUGIN.get().unwrap();
@@ -29,20 +29,22 @@ pub unsafe fn list() {
         }
     };
 
+    let to_str = |ptr| CStr::from_ptr(ptr).to_string_lossy().to_owned();
+
     for (hook, method) in hooks.list() {
         let addr = hook.addr as usize;
 
         let param_count = hooks.get_method_param_count(*method);
 
-        let method_name = CStr::from_ptr(hooks.get_method_name(*method).unwrap()).to_string_lossy().to_owned();
+        let method_name = to_str(hooks.get_method_name(*method).unwrap());
 
         let class = hooks.get_class_from_method(*method).unwrap();
-        let class_name = CStr::from_ptr(hooks.get_class_name(class).unwrap()).to_string_lossy().to_owned();
+        let class_name = to_str(hooks.get_class_name(class).unwrap());
 
-        let namespace = CStr::from_ptr(hooks.get_namespace_from_class(class).unwrap()).to_string_lossy().to_owned();
+        let namespace = to_str(hooks.get_namespace_from_class(class).unwrap());
 
         let image = hooks.get_image_from_class(class).unwrap();
-        let image_name = CStr::from_ptr(hooks.get_image_name(image).unwrap()).to_string_lossy().to_owned();
+        let image_name = to_str(hooks.get_image_name(image).unwrap());
 
         log(format!(
             "{:<w1$} {} {} {} {} {:<w6$}",

@@ -12,7 +12,7 @@ pub struct Vtable {
 
     pub interceptor_hook: unsafe extern "C" fn(
         this: *const Interceptor,
-        orig_addr: *mut Method,
+        orig_addr: *mut MethodAddress,
         hook_addr: *mut c_void,
     ) -> usize,
     pub interceptor_hook_vtable: unsafe extern "C" fn(
@@ -42,51 +42,51 @@ pub struct Vtable {
         class_name: *const c_char,
     ) -> *mut Class,
     pub il2cpp_get_class_from_method: unsafe extern "C" fn(
-        method: *mut Method
+        method: *mut MethodInfo
     ) -> *mut Class,
     pub il2cpp_get_class_name: unsafe extern "C" fn(
         class: *mut Class
     ) -> *const c_char,
     pub il2cpp_get_methods: unsafe extern "C" fn(
         class: *const Class
-    ) -> List<*mut Method>,
+    ) -> List<*mut MethodInfo>,
     pub il2cpp_get_method: unsafe extern "C" fn(
         class: *mut Class,
         name: *const c_char,
         args_count: i32,
-    ) -> *const Method,
+    ) -> *const MethodInfo,
     pub il2cpp_get_method_name: unsafe extern "C" fn(
-        method: *mut Method
+        method: *mut MethodInfo
     ) -> *const c_char,
     pub il2cpp_get_method_overload: unsafe extern "C" fn(
         class: *mut Class,
         name: *const c_char,
         params: *const TypeEnum,
         param_count: usize,
-    ) -> *const Method,
+    ) -> *const MethodInfo,
     pub il2cpp_get_method_addr: unsafe extern "C" fn(
         class: *mut Class,
         name: *const c_char,
         args_count: i32,
-    ) -> *mut c_void,
+    ) -> *mut MethodAddress,
     pub il2cpp_get_method_overload_addr: unsafe extern "C" fn(
         class: *mut Class,
         name: *const c_char,
         params: *const TypeEnum,
         param_count: usize,
-    ) -> *mut c_void,
+    ) -> *mut MethodAddress,
     pub il2cpp_get_method_cached: unsafe extern "C" fn(
         class: *mut Class,
         name: *const c_char,
         args_count: i32,
-    ) -> *const Method,
+    ) -> *const MethodInfo,
     pub il2cpp_get_method_addr_cached: unsafe extern "C" fn(
         class: *mut Class,
         name: *const c_char,
         args_count: i32,
-    ) -> *mut Method,
+    ) -> *mut MethodInfo,
     pub il2cpp_get_method_param_count: unsafe extern "C" fn(
-        method: *mut Method
+        method: *mut MethodInfo
     ) -> u32,
     pub il2cpp_find_nested_class:
         unsafe extern "C" fn(class: *mut Class, name: *const c_char) -> *mut Class,

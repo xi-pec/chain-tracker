@@ -12,24 +12,25 @@ pub unsafe fn get_hachimi_and_interceptor() -> (*const Hachimi, *const Intercept
 macro_rules! define_hook {
     ($name:ident, ($($arg:ident),*)) => {
         pub unsafe extern "C" fn $name(this: *mut c_void, intermediate: *mut c_void, $($arg: *mut c_void),*) -> *mut c_void {
-            if let Some(vtable) = VTABLE {
-                let (_, interceptor) = get_hachimi_and_interceptor();
+            let vtable = VTABLE.unwrap();
+            let (_, interceptor) = get_hachimi_and_interceptor();
 
-                let trampoline = (vtable.interceptor_get_trampoline_addr)(
-                    interceptor,
-                    intermediate as *mut c_void
-                );
+            let trampoline = (vtable.interceptor_get_trampoline_addr)(
+                interceptor,
+                intermediate as *mut c_void
+            );
 
-                type HookSig = unsafe extern "C" fn(*mut c_void, $($arg: *mut c_void),*) -> *mut c_void;
-                let original: HookSig = std::mem::transmute(trampoline);
-                let result = original(this, $($arg),*);
+            type HookSig = unsafe extern "C" fn(*mut c_void, $($arg: *mut c_void),*) -> *mut c_void;
+            let original: HookSig = std::mem::transmute(trampoline);
+            let result = original(this, $($arg),*);
 
-                println!(concat!(stringify!($name), " invoked"));
+            let plugin = PLUGIN.get().unwrap();
+            let mutex = plugin.hooks.get().unwrap();
+            let mut hooks = mutex.lock().unwrap();
 
-                result
-            } else {
-                std::ptr::null_mut()
-            }
+            hooks.callback(trampoline);
+
+            result
         }
     };
 }

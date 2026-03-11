@@ -4,7 +4,8 @@ use crate::vtable::VTABLE;
 #[repr(C)] pub struct Interceptor { _unused: [u8; 0] }
 #[repr(C)] pub struct Image { _unused: [u8; 0] }
 #[repr(C)] pub struct Class { _unused: [u8; 0] }
-#[repr(C)] pub struct Method { _unused: [u8; 0] }
+#[repr(C)] pub struct MethodInfo { _unused: [u8; 0] }
+#[repr(C)] pub struct MethodAddress { _unused: [u8; 0] }
 #[repr(C)] pub struct TypeEnum { _unused: [u8; 0] }
 #[repr(C)] pub struct Field { _unused: [u8; 0] }
 #[repr(C)] pub struct Object { _unused: [u8; 0] }
