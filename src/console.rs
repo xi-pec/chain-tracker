@@ -14,7 +14,7 @@ use winapi::um::winnt::{GENERIC_WRITE, FILE_SHARE_WRITE, HANDLE};
 const ENABLE_VIRTUAL_TERMINAL_PROCESSING: u32 = 0x0004;
 
 static mut CONSOLE_INIT: bool = false;
-static mut out: HANDLE = INVALID_HANDLE_VALUE;
+static mut OUT: HANDLE = INVALID_HANDLE_VALUE;
 
 pub unsafe fn init_console() {
     if CONSOLE_INIT { return }
@@ -31,7 +31,7 @@ pub unsafe fn init_console() {
         }
     }
 
-    out = CreateFileA(
+    OUT = CreateFileA(
         b"CONOUT$\0".as_ptr() as _,
         GENERIC_WRITE,
         FILE_SHARE_WRITE,
@@ -42,8 +42,8 @@ pub unsafe fn init_console() {
     );
 
     let mut private: u32 = 0;
-    if GetConsoleMode(out, &mut private) != 0 {
-        SetConsoleMode(out, private | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+    if GetConsoleMode(OUT, &mut private) != 0 {
+        SetConsoleMode(OUT, private | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
     }
 
     let (_reader, writer) = os_pipe::pipe().unwrap();
@@ -76,11 +76,11 @@ pub fn log<S: AsRef<str>>(message: S) {
 
 fn raw_write<S: AsRef<str>>(text: S) {
     unsafe {
-        if out == INVALID_HANDLE_VALUE { return; }
+        if OUT == INVALID_HANDLE_VALUE { return; }
         let mut written = 0;
         let s = text.as_ref();
         WriteFile(
-            out,
+            OUT,
             s.as_ptr() as _,
             s.len() as u32,
             &mut written,
