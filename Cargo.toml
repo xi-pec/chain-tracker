@@ -1,11 +1,21 @@
 [package]
-name = "umaspy"
+name = "chain-tracker"
 version = "0.2.0"
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib"]
 
+[profile.release]
+opt-level = 3
+strip = "symbols" 
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+
 [dependencies]
 os_pipe = "1.2.3"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.149"
+sqlite = "0.37.0"
 winapi = { version = "0.3.9", features = ["consoleapi", "wincon", "fileapi", "winbase", "handleapi", "winnt", "processenv", "memoryapi"] }

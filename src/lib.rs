@@ -1,8 +1,10 @@
 mod console;
 mod vtable;
-mod hooks;
-mod types;
 mod plugin;
+mod il2cpp;
+mod types;
+mod hooks;
+mod core;
 
 use crate::vtable::Vtable;
 use crate::plugin::PLUGIN;
@@ -22,8 +24,8 @@ pub unsafe extern "C" fn hachimi_init(vtable: *const Vtable, version: i32) -> In
     if !success { return InitResult::Error };
 
     if let Some(_) = PLUGIN.get() {
-        log("UmaSpy v0.2.0");
-    } else { return InitResult::Error }
+        log("Chain Tracker");
+    } else { return InitResult::Error };
 
     InitResult::Ok
 }

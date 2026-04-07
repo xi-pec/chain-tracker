@@ -1,0 +1,9 @@
+#![allow(non_snake_case)]
+
+pub mod Deserialize;
+
+pub unsafe fn init(image: &str, namespace: &str) {
+    let klass = "SingleModeBreedersExecCommandResponseFormatter";
+
+    Deserialize::init(image, namespace, klass);
+}

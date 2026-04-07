@@ -1,15 +1,20 @@
-use crate::{
-    hooks::Hooks, types::{Hachimi, Interceptor}, vtable::Vtable
-};
+use crate::types::*;
+use crate::vtable::Vtable;
+use crate::il2cpp::api::IAPI;
+use crate::hooks::Hooks;
+use crate::core::Core;
 
-use std::sync::{OnceLock, Mutex};
+use std::sync::OnceLock;
+
 
 pub struct Plugin {
     pub vtable: &'static Vtable,
-    pub hachimi: *const Hachimi,
-    pub interceptor: *const Interceptor,
+    pub hachimi: Hachimi,
+    pub interceptor: Interceptor,
 
-    pub hooks: OnceLock<Mutex<Hooks>>
+    pub il2cpp: IAPI,
+    pub core: Core,
+    pub hooks: Hooks
 }
 
 impl Plugin {
@@ -17,10 +22,11 @@ impl Plugin {
         let hachimi = (vtable.hachimi_instance)();
         let interceptor = (vtable.hachimi_get_interceptor)(hachimi);
         
-        let hooks = OnceLock::new();
-        let _ = hooks.set(Mutex::new(Hooks::init(vtable, interceptor)));
+        let il2cpp = IAPI::init(vtable, interceptor);
+        let core = Core::init(il2cpp);
+        let hooks = Hooks::init(il2cpp);
 
-        Self { vtable, hachimi, interceptor, hooks }
+        Self { vtable, hachimi, interceptor, il2cpp, core, hooks }
     }
 }
 
@@ -33,7 +39,11 @@ pub unsafe fn init(vtable: *const Vtable, version: i32) -> bool {
     if vtable.is_null() || version < 2 { return false }
     let vtable = Vtable::init(vtable);
     
-    let _ = PLUGIN.set(Plugin::init(vtable));
+    let Ok(_) = PLUGIN.set(Plugin::init(vtable))
+    else { return false };
+    
+    let plugin = PLUGIN.get().unwrap();
+    plugin.hooks.setup();
 
     true
 }

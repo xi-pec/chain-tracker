@@ -1,7 +1,4 @@
-pub mod commands;
-
 use std::ptr;
-use std::io;
 use std::os::windows::io::AsRawHandle;
 use winapi::um::consoleapi::{AllocConsole, GetConsoleMode, SetConsoleMode};
 use winapi::um::wincon::FreeConsole;
@@ -51,26 +48,10 @@ pub unsafe fn init_console() {
 
     SetStdHandle(STD_OUTPUT_HANDLE, raw_writer as _);
     SetStdHandle(STD_ERROR_HANDLE, raw_writer as _);
-
-    std::thread::spawn(move || {
-        let mut input = String::new();
-
-        loop {
-            input.clear();
-            if io::stdin().read_line(&mut input).is_ok() {
-                let cmd = input.trim();
-                if cmd.is_empty() {
-                    raw_write("\x1b[1A\r>> ");
-                } else {
-                    commands::run(cmd);
-                }
-            }
-        }
-    });
 }
 
 pub fn log<S: AsRef<str>>(message: S) {
-    let formatted = format!("\r\x1b[2K\x1b[32m[LOG]\x1b[0m {}\n>> ", message.as_ref());
+    let formatted = format!("\r\x1b[2K\x1b[36m[INFO]\x1b[0m {}\n", message.as_ref());
     raw_write(formatted);
 }
 
