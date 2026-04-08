@@ -1,3 +1,4 @@
+use crate::plugin;
 use crate::vtable::Vtable;
 use crate::il2cpp::api::IAPI;
 use crate::core::Core;
@@ -33,6 +34,9 @@ pub unsafe fn init(vtable: *const Vtable, version: i32) -> bool {
     
     let Ok(_) = PLUGIN.set(Plugin::init(vtable))
     else { return false };
+
+    let plugin = PLUGIN.get().unwrap();
+    plugin.core.setup();
 
     true
 }

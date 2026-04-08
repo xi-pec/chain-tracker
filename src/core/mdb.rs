@@ -1,7 +1,9 @@
 pub mod chain_events;
+pub mod chara_names;
 pub mod support_card;
 
 use chain_events::{ChainEvent, ChainEventData};
+use chara_names::CharaName;
 use support_card::{SupportCard, SupportCardData};
 
 use std::collections::HashMap;
@@ -11,11 +13,11 @@ use std::sync::{Mutex, OnceLock};
 
 use sqlite;
 
-
 pub struct MDB {
     connection: OnceLock<Mutex<sqlite::Connection>>,
 
     pub chain_events: OnceLock<HashMap<i64, ChainEventData>>,
+    pub chara_names: OnceLock<HashMap<i64, String>>,
     pub support_cards: OnceLock<HashMap<i64, SupportCardData>>
 }
 
@@ -24,6 +26,7 @@ impl MDB {
         let connection = OnceLock::new();
 
         let chain_events = OnceLock::new();
+        let chara_names = OnceLock::new();
         let support_cards = OnceLock::new();
 
         let dir = env::current_dir();
@@ -33,11 +36,12 @@ impl MDB {
         let db = sqlite::open(mdb_path).unwrap();
         let _ = connection.set(Mutex::new(db));
 
-        Self { connection, chain_events, support_cards }
+        Self { connection, chain_events, chara_names, support_cards }
     }
 
     pub fn load(&self) {
         self.load_chain_events();
+        self.load_chara_names();
         self.load_support_cards();
     }
 
@@ -82,17 +86,58 @@ impl MDB {
         }
     }
 
+    fn load_chara_names(&self) {
+        let chara_names_data = self.query("
+            SELECT \"index\", text
+            FROM 'text_data'
+            WHERE id = 6 AND category = 6
+        ", |data| {
+            CharaName {
+                chara_id: data.read(0).unwrap(),
+                name: data.read(1).unwrap()
+            }
+        });
+
+        if let Some(chara_names_data) = chara_names_data {
+            let mut chara_names: HashMap<i64, String> = HashMap::new();
+
+            for chara_name_data in chara_names_data {
+                chara_names.insert(chara_name_data.chara_id, chara_name_data.name);
+            }
+            
+            let _ = self.chara_names.set(chara_names);
+        }
+    }
+
     fn load_support_cards(&self) {
         let support_cards_data = self.query("
-            SELECT id, chara_id, rarity, support_card_type
+            SELECT id, chara_id, rarity, command_id, support_card_type
             FROM 'support_card_data'
         ", |data| {
+            let command_id: i64 = data.read(3).unwrap();
+            let card_type: i64 = data.read(4).unwrap();
+
+            let r#type = match card_type {
+                1 => match command_id {
+                    101 => 1, // speed
+                    105 => 2, // stamina
+                    102 => 3, // power
+                    103 => 4, // guts
+                    106 => 5, // wit
+                    _ => 0
+                },
+
+                2 => 6, // friend
+                3 => 7, // group
+                _ => 0
+            };
+            
             SupportCard {
                 card_id: data.read(0).unwrap(),
                 data: SupportCardData {
                     chara_id: data.read(1).unwrap(),
                     rarity: data.read(2).unwrap(),
-                    r#type: data.read(2).unwrap()
+                    r#type
                 }
             }
         });

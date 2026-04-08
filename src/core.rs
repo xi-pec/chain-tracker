@@ -20,9 +20,11 @@ impl Core {
         let mdb = MDB::init();
         let utils = Utils::init(il2cpp);
 
-        hooks.setup();        
-        mdb.load();
-
         Self { hooks, mdb, utils }
+    }
+
+    pub unsafe fn setup(&self) {
+        self.hooks.setup();        
+        self.mdb.load();
     }
 }

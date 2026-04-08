@@ -3,7 +3,7 @@
 pub mod Deserialize;
 
 pub unsafe fn init(image: &str, namespace: &str) {
-    let klass = "SingleModeBreedersCheckEventResponseFormatter";
+    let class = "SingleModeBreedersCheckEventResponseFormatter";
 
-    Deserialize::init(image, namespace, klass);
+    Deserialize::init(image, namespace, class);
 }

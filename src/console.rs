@@ -1,7 +1,7 @@
 use std::ptr;
 use std::os::windows::io::AsRawHandle;
 use winapi::um::consoleapi::{AllocConsole, GetConsoleMode, SetConsoleMode};
-use winapi::um::wincon::FreeConsole;
+use winapi::um::wincon::{FreeConsole, SetConsoleOutputCP};
 use winapi::um::fileapi::{CreateFileA, OPEN_EXISTING, WriteFile};
 use winapi::um::processenv::{GetStdHandle, SetStdHandle};
 use winapi::um::winbase::{STD_OUTPUT_HANDLE, STD_ERROR_HANDLE};
@@ -19,6 +19,7 @@ pub unsafe fn init_console() {
 
     FreeConsole();
     AllocConsole();
+    SetConsoleOutputCP(65001);
 
     let default_out = GetStdHandle(STD_OUTPUT_HANDLE);
     if default_out != INVALID_HANDLE_VALUE {
