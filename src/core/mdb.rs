@@ -1,6 +1,8 @@
 pub mod chain_events;
+pub mod support_card;
 
 use chain_events::{ChainEvent, ChainEventData};
+use support_card::{SupportCard, SupportCardData};
 
 use std::collections::HashMap;
 use std::env;
@@ -10,17 +12,19 @@ use std::sync::{Mutex, OnceLock};
 use sqlite;
 
 
-
 pub struct MDB {
     connection: OnceLock<Mutex<sqlite::Connection>>,
 
-    pub chain_events: OnceLock<HashMap<i32, ChainEventData>>
+    pub chain_events: OnceLock<HashMap<i64, ChainEventData>>,
+    pub support_cards: OnceLock<HashMap<i64, SupportCardData>>
 }
 
 impl MDB {
     pub fn init() -> Self {
         let connection = OnceLock::new();
+
         let chain_events = OnceLock::new();
+        let support_cards = OnceLock::new();
 
         let dir = env::current_dir();
         let dir_path = PathBuf::from(dir.unwrap());
@@ -29,7 +33,7 @@ impl MDB {
         let db = sqlite::open(mdb_path).unwrap();
         let _ = connection.set(Mutex::new(db));
 
-        Self { connection, chain_events }
+        Self { connection, chain_events, support_cards }
     }
 
     pub fn load(&self) {
@@ -67,13 +71,39 @@ impl MDB {
         });
 
         if let Some(chain_events_data) = chain_events_data {
-            let mut chain_events: HashMap<i32, ChainEventData> = HashMap::new();
+            let mut chain_events: HashMap<i64, ChainEventData> = HashMap::new();
 
             for chain_event_data in chain_events_data {
-                chain_events.insert(chain_event_data.story_id as i32, chain_event_data.data);
+                chain_events.insert(chain_event_data.story_id, chain_event_data.data);
             }
             
             let _ = self.chain_events.set(chain_events);
+        }
+    }
+
+    fn load_support_cards(&self) {
+        let support_cards_data = self.query("
+            SELECT id, chara_id, rarity, support_card_type
+            FROM 'support_card_data'
+        ", |data| {
+            SupportCard {
+                card_id: data.read(0).unwrap(),
+                data: SupportCardData {
+                    chara_id: data.read(1).unwrap(),
+                    rarity: data.read(2).unwrap(),
+                    r#type: data.read(2).unwrap()
+                }
+            }
+        });
+
+        if let Some(support_cards_data) = support_cards_data {
+            let mut support_cards: HashMap<i64, SupportCardData> = HashMap::new();
+
+            for support_card_data in support_cards_data {
+                support_cards.insert(support_card_data.card_id, support_card_data.data);
+            }
+            
+            let _ = self.support_cards.set(support_cards);
         }
     }
 }
