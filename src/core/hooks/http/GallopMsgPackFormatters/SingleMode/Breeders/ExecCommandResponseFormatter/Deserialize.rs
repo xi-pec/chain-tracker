@@ -28,7 +28,7 @@ unsafe extern "C" fn hook(this: *mut c_void, bytes: *mut c_void, offset: *mut c_
         let Some(chain_event_data) = plugin.core.utils
             .get_field_data(event_info, "story_id")
             .ok()
-            .and_then(|id| chain_events.get(&(id as i32)))
+            .and_then(|id| chain_events.get(&(id as i64)))
         else { continue };
         
         // unchecked_event_array[i] > event_contents_info > support_card_id
@@ -36,8 +36,8 @@ unsafe extern "C" fn hook(this: *mut c_void, bytes: *mut c_void, offset: *mut c_
             .and_then(|event_contents_info| plugin.core.utils.get_field_data(event_contents_info, "support_card_id"))
         else { continue };
 
-        let current_progress = chain_event_data.current_progress as i32;
-        let max_progress = chain_event_data.max_progress as i32;
+        let current_progress = chain_event_data.current_progress;
+        let max_progress = chain_event_data.max_progress;
 
         crate::console::log(format!("Chain event of Card ID {}, Progress {}/{}. ", support_card_id as i32, current_progress, max_progress))
     }
