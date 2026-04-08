@@ -3,7 +3,6 @@ mod vtable;
 mod plugin;
 mod il2cpp;
 mod types;
-mod hooks;
 mod core;
 
 use crate::vtable::Vtable;

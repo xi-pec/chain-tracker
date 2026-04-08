@@ -1,20 +1,13 @@
-use crate::types::*;
 use crate::vtable::Vtable;
 use crate::il2cpp::api::IAPI;
-use crate::hooks::Hooks;
 use crate::core::Core;
 
 use std::sync::OnceLock;
 
 
 pub struct Plugin {
-    pub vtable: &'static Vtable,
-    pub hachimi: Hachimi,
-    pub interceptor: Interceptor,
-
     pub il2cpp: IAPI,
     pub core: Core,
-    pub hooks: Hooks
 }
 
 impl Plugin {
@@ -24,9 +17,8 @@ impl Plugin {
         
         let il2cpp = IAPI::init(vtable, interceptor);
         let core = Core::init(il2cpp);
-        let hooks = Hooks::init(il2cpp);
 
-        Self { vtable, hachimi, interceptor, il2cpp, core, hooks }
+        Self { il2cpp, core }
     }
 }
 
@@ -41,9 +33,6 @@ pub unsafe fn init(vtable: *const Vtable, version: i32) -> bool {
     
     let Ok(_) = PLUGIN.set(Plugin::init(vtable))
     else { return false };
-    
-    let plugin = PLUGIN.get().unwrap();
-    plugin.hooks.setup();
 
     true
 }

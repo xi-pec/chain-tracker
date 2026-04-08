@@ -49,7 +49,7 @@ pub unsafe fn init(image: &str, namespace: &str, class: &str) {
     let Some(plugin) = PLUGIN.get()
     else { return };
 
-    plugin.hooks.install(
+    plugin.core.hooks.install(
         image, namespace, class,
         "Deserialize", 4,
         hook as Address
