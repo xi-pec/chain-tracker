@@ -17,6 +17,9 @@ unsafe extern "C" fn hook(this: *mut c_void, bytes: *mut c_void, offset: *mut c_
     let Some(chain_events) = plugin.core.mdb.chain_events.get()
     else { return result };
 
+    let Some(support_cards) = plugin.core.mdb.support_cards.get()
+    else { return result };
+
     // response > data > unchecked_event_array
     let Ok(unchecked_event_array_vector) = plugin.core.utils.get_field_data(result, "data")
         .and_then(|data| plugin.core.utils.get_field_data(data, "unchecked_event_array"))
@@ -32,14 +35,19 @@ unsafe extern "C" fn hook(this: *mut c_void, bytes: *mut c_void, offset: *mut c_
         else { continue };
         
         // unchecked_event_array[i] > event_contents_info > support_card_id
-        let Ok(support_card_id) = plugin.core.utils.get_field_data(event_info, "event_contents_info")
+        let Some(support_card_data) = plugin.core.utils.get_field_data(event_info, "event_contents_info")
             .and_then(|event_contents_info| plugin.core.utils.get_field_data(event_contents_info, "support_card_id"))
+            .ok()
+            .and_then(|support_card_id| support_cards.get(&(support_card_id as i64)))
         else { continue };
 
+        let chara_id = support_card_data.chara_id;
+        let rarity = support_card_data.rarity;
+        let r#type = support_card_data.r#type;
         let current_progress = chain_event_data.current_progress;
         let max_progress = chain_event_data.max_progress;
 
-        crate::console::log(format!("Chain event of Card ID {}, Progress {}/{}. ", support_card_id as i32, current_progress, max_progress))
+        crate::console::log(format!("Chain event of Card ID {}, Progress {}/{}. ", chara_id, current_progress, max_progress))
     }
 
     result
