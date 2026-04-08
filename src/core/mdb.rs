@@ -38,6 +38,7 @@ impl MDB {
 
     pub fn load(&self) {
         self.load_chain_events();
+        self.load_support_cards();
     }
 
     pub fn query<F, T>(&self, sql: &str, mut callback: F) -> Option<Vec<T>>
