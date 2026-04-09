@@ -63,7 +63,7 @@ impl IAPI {
 
     pub unsafe fn get_object_class(&self, object: IObject) -> Result<IClass, i32> {
         // polyfill implementation
-        if object.is_null() { crate::console::log("null obj"); return Err(1) }
+        if object.is_null() { return Err(1) }
 
         let ptr = object as *mut IObjectP;
         if ptr.is_null() { return Err(1) }
@@ -72,7 +72,7 @@ impl IAPI {
         let class = object.data.class;
 
         if !class.is_null() { Ok(class) }
-        else { crate::console::log("null obj class"); Err(2) }
+        else { Err(2) }
     }
 
     pub unsafe fn get_method(&self, class: IClass, method_name: &str, args: i32) -> Result<IMethod, i32> {
