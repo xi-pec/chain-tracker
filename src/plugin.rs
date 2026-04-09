@@ -1,7 +1,7 @@
-use crate::plugin;
 use crate::vtable::Vtable;
 use crate::il2cpp::api::IAPI;
 use crate::core::Core;
+use crate::console::Console;
 
 use std::sync::OnceLock;
 
@@ -9,6 +9,7 @@ use std::sync::OnceLock;
 pub struct Plugin {
     pub il2cpp: IAPI,
     pub core: Core,
+    pub console: Console,
 }
 
 impl Plugin {
@@ -18,8 +19,9 @@ impl Plugin {
         
         let il2cpp = IAPI::init(vtable, interceptor);
         let core = Core::init(il2cpp);
+        let console = Console::init();
 
-        Self { il2cpp, core }
+        Self { il2cpp, core, console }
     }
 }
 
