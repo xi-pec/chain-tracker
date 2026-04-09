@@ -2,6 +2,9 @@ pub mod chain_events;
 pub mod chara_names;
 pub mod support_card;
 
+use crate::core::localizer::LocalizedString;
+use crate::plugin::PLUGIN;
+
 use chain_events::{ChainEvent, ChainEventData};
 use chara_names::CharaName;
 use support_card::{SupportCard, SupportCardData};
@@ -17,7 +20,7 @@ pub struct MDB {
     connection: OnceLock<Mutex<sqlite::Connection>>,
 
     pub chain_events: OnceLock<HashMap<i64, ChainEventData>>,
-    pub chara_names: OnceLock<HashMap<i64, String>>,
+    pub chara_names: OnceLock<HashMap<i64, LocalizedString>>,
     pub support_cards: OnceLock<HashMap<i64, SupportCardData>>
 }
 
@@ -30,10 +33,13 @@ impl MDB {
         let support_cards = OnceLock::new();
 
         let dir = env::current_dir();
-        let dir_path = PathBuf::from(dir.unwrap());
-        let mdb_path = dir_path.join( "UmamusumePrettyDerby_Jpn_Data\\Persistent\\master\\master.mdb");
+        let path = PathBuf::from(dir.unwrap())
+            .join( "UmamusumePrettyDerby_Jpn_Data")
+            .join("Persistent")
+            .join("master")
+            .join("master.mdb");
 
-        let db = sqlite::open(mdb_path).unwrap();
+        let db = sqlite::open(path).unwrap();
         let _ = connection.set(Mutex::new(db));
 
         Self { connection, chain_events, chara_names, support_cards }
@@ -99,10 +105,17 @@ impl MDB {
         });
 
         if let Some(chara_names_data) = chara_names_data {
-            let mut chara_names: HashMap<i64, String> = HashMap::new();
+            let mut chara_names: HashMap<i64, LocalizedString> = HashMap::new();
+            let plugin = PLUGIN.get().unwrap();
 
             for chara_name_data in chara_names_data {
-                chara_names.insert(chara_name_data.chara_id, chara_name_data.name);
+                let localized = plugin.core.localizer.get_localization(
+                    "6", 
+                    &format!("{}",chara_name_data.chara_id),
+                    &chara_name_data.name
+                );
+
+                chara_names.insert(chara_name_data.chara_id, localized);
             }
             
             let _ = self.chara_names.set(chara_names);

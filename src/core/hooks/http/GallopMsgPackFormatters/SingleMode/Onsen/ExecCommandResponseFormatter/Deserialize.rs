@@ -48,6 +48,8 @@ unsafe extern "C" fn hook(this: *mut c_void, bytes: *mut c_void, offset: *mut c_
         let Some(chara_name) = chara_names.get(&support_card_data.chara_id)
         else { continue };
 
+        let chara_name = chara_name.resolve();
+
         let rarity = match support_card_data.rarity {
             1 => "R",
             2 => "SR",
