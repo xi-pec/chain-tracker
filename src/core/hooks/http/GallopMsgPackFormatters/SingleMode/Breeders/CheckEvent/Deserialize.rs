@@ -17,18 +17,15 @@ unsafe extern "C" fn hook(this: *mut c_void, bytes: *mut c_void, offset: *mut c_
     let Some(chain_events) = plugin.core.mdb.chain_events.get()
     else { return result };
 
-    let Some(chara_names) = plugin.core.mdb.chara_names.get()
-    else { return result };
-
-    let Some(support_cards) = plugin.core.mdb.support_cards.get()
-    else { return result };
-
     // response > data > unchecked_event_array
     let Ok(unchecked_event_array_vector) = plugin.core.utils.get_field_data(result, "data")
         .and_then(|data| plugin.core.utils.get_field_data(data, "unchecked_event_array"))
         .and_then(|unchecked_event_array| plugin.core.utils.get_vector(unchecked_event_array))
     else { return result };
     
+    let console = &plugin.console;
+    let ui = &console.ui;
+
     for event_info in unchecked_event_array_vector {
         // unchecked_event_array[i] > story_id
         let Some(chain_event_data) = plugin.core.utils
@@ -39,39 +36,16 @@ unsafe extern "C" fn hook(this: *mut c_void, bytes: *mut c_void, offset: *mut c_
 
         
         // unchecked_event_array[i] > event_contents_info > support_card_id
-        let Some(support_card_data) = plugin.core.utils.get_field_data(event_info, "event_contents_info")
+        let Ok(id) = plugin.core.utils.get_field_data(event_info, "event_contents_info")
             .and_then(|event_contents_info| plugin.core.utils.get_field_data(event_contents_info, "support_card_id"))
-            .ok()
-            .and_then(|support_card_id| support_cards.get(&(support_card_id as i64)))
-        else { continue };
-            
-        let Some(chara_name) = chara_names.get(&support_card_data.chara_id)
         else { continue };
 
-        let chara_name = chara_name.resolve();
+        let id = id as i64;
+        let current = chain_event_data.current_progress;
+        let max = chain_event_data.max_progress;
 
-        let rarity = match support_card_data.rarity {
-            1 => "R",
-            2 => "SR",
-            3 => "SSR",
-            _ => "???"
-        };
-
-        let r#type = match support_card_data.r#type {
-            1 => "SPD",
-            2 => "STA",
-            3 => "POW",
-            4 => "GUT",
-            5 => "WIT",
-            6 => "FRD",
-            7 => "GRP",
-            _ => "???"
-        };
-
-        let current_progress = chain_event_data.current_progress;
-        let max_progress = chain_event_data.max_progress;
-
-        crate::console::log(format!("{}/{} chain event of {} {} {}", current_progress, max_progress, rarity, r#type, chara_name))
+        ui.update(id, current, max);
+        console.update();
     }
 
     result

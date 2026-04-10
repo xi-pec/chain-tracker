@@ -16,7 +16,8 @@ const ENABLE_VIRTUAL_TERMINAL_PROCESSING: u32 = 0x0004;
 
 pub struct Console {
     handle: HANDLE,
-    ui: UI
+    
+    pub ui: UI
 }
 
 impl Console {
@@ -59,14 +60,33 @@ impl Console {
     }
 
     pub fn log<S: AsRef<str>>(&self, message: S) {
-        let formatted = format!("\r\x1b[2K\x1b[36m[INFO]\x1b[0m {}\n", message.as_ref());
+        let formatted = format!("\r\x1b[2K\x1b[94m[INFO]\x1b[0m {}\n", message.as_ref());
         self.raw_write(formatted);
         self.update();
     }
 
     pub fn update(&self) {
-        let ui = format!("\x1b[s\x1b[999;1H\x1b[2K\x1b[1;33m{}\x1b[0m\x1b[u", self.ui);
-        self.raw_write(ui);
+        let content = self.ui.to_string();
+        let lines: Vec<&str> = content.lines().collect();
+        let line_count = lines.len();
+
+        let mut seq = String::from("\x1b[s");
+
+        for (i, line) in lines.iter().enumerate() {
+            let move_up = line_count - 1 - i;
+            if move_up > 0 {
+                seq.push_str(&format!("\x1b[999;1H\x1b[{}A\x1b[2K", move_up));
+            } else {
+                seq.push_str("\x1b[999;1H\x1b[2K");
+            }
+            
+            seq.push_str("\x1b[1;33m");
+            seq.push_str(line);
+            seq.push_str("\x1b[0m");
+        }
+
+        seq.push_str("\x1b[u");
+        self.raw_write(seq);
     }
 
     pub fn raw_write<S: AsRef<str>>(&self, text: S) {

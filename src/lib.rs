@@ -19,7 +19,7 @@ pub unsafe extern "C" fn hachimi_init(vtable: *const Vtable, version: i32) -> In
     let success = plugin::init(vtable, version);
     if !success { return InitResult::Error };
 
-    if let Some(plugin) = PLUGIN.get() {
+    if let Some(plugin) = PLUGIN.get() {        
         plugin.console.log("Chain Tracker");
     } else { return InitResult::Error };
 

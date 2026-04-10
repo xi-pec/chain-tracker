@@ -87,6 +87,10 @@ impl MDB {
             for chain_event_data in chain_events_data {
                 chain_events.insert(chain_event_data.story_id, chain_event_data.data);
             }
+
+            let plugin = PLUGIN.get().unwrap();
+            let console = &plugin.console;
+            console.log(format!("Loaded {} chain event entries", chain_events.len()));
             
             let _ = self.chain_events.set(chain_events);
         }
@@ -117,6 +121,10 @@ impl MDB {
 
                 chara_names.insert(chara_name_data.chara_id, localized);
             }
+
+            let plugin = PLUGIN.get().unwrap();
+            let console = &plugin.console;
+            console.log(format!("Loaded {} character name entries", chara_names.len()));
             
             let _ = self.chara_names.set(chara_names);
         }
@@ -161,6 +169,10 @@ impl MDB {
             for support_card_data in support_cards_data {
                 support_cards.insert(support_card_data.card_id, support_card_data.data);
             }
+
+            let plugin = PLUGIN.get().unwrap();
+            let console = &plugin.console;
+            console.log(format!("Loaded {} support card entries", support_cards.len()));
             
             let _ = self.support_cards.set(support_cards);
         }
