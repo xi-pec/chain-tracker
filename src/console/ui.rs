@@ -138,7 +138,7 @@ impl fmt::Display for Type {
             Self::GUT => write!(f, "\x1b[38;5;213mGUT{}", reset),
             Self::WIT => write!(f, "\x1b[38;5;120mWIT{}", reset),
             Self::FRD => write!(f, "\x1b[38;5;227mFRD{}", reset),
-            Self::GRP => write!(f, "\x1b[38;5;171mGRP{}", reset),
+            Self::GRP => write!(f, "\x1b[38;5;121mGRP{}", reset),
             Self::UNKNOWN => write!(f, "\x1b[90m???{}", reset),
         }
     }

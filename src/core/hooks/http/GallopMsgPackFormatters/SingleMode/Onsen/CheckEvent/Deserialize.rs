@@ -3,15 +3,18 @@ use crate::types::*;
 
 use std::ffi::c_void;
 
-type Hook = unsafe extern "C" fn(*mut c_void, *mut c_void, *mut c_void, *mut c_void, *mut c_void) -> *mut c_void;
-unsafe extern "C" fn hook(this: *mut c_void, bytes: *mut c_void, offset: *mut c_void, resolver: *mut c_void, size: *mut c_void) -> *mut c_void {
+type SingleModeOnsenCheckEventHook = unsafe extern "C" fn(*mut c_void, *mut c_void, *mut c_void, *mut c_void, *mut c_void) -> *mut c_void;
+
+#[inline(never)]
+#[no_mangle]
+unsafe extern "C" fn single_mode_onsen_check_event_hook(this: *mut c_void, bytes: *mut c_void, offset: *mut c_void, resolver: *mut c_void, size: *mut c_void) -> *mut c_void {
     let Some(plugin) = PLUGIN.get()
     else { return std::ptr::null_mut() };
 
-    let Ok(trampoline) = plugin.il2cpp.get_trampoline(hook as Address)
+    let Ok(trampoline) = plugin.il2cpp.get_trampoline(single_mode_onsen_check_event_hook as Address)
     else { return std::ptr::null_mut() };
 
-    let original: Hook = std::mem::transmute(trampoline);
+    let original: SingleModeOnsenCheckEventHook = std::mem::transmute(trampoline);
     let result = original(this, bytes, offset, resolver, size);
 
     let Some(chain_events) = plugin.core.mdb.chain_events.get()
@@ -58,6 +61,6 @@ pub unsafe fn init(image: &str, namespace: &str, class: &str) {
     plugin.core.hooks.install(
         image, namespace, class,
         "Deserialize", 4,
-        hook as Address
+        single_mode_onsen_check_event_hook as Address
     );
 }
