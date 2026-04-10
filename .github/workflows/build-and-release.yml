@@ -22,6 +22,8 @@ jobs:
     
     - name: Build DLL
       run: cargo build --release
+      env:
+       RUSTFLAGS: "-C target-feature=+crt-static"
 
     - name: Rename DLL
       shell: bash
