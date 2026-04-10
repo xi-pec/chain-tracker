@@ -6,6 +6,11 @@ on:
       - 'v*.*.*'
 
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag'
+        required: true
+        default: 'v0.0.0-manual'
 
 jobs:
   build-and-release:
