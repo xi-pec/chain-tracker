@@ -1,3 +1,6 @@
+// Copyright (c) xi-pec
+// Licensed under GNU General Public License V3.0.
+
 mod console;
 mod vtable;
 mod plugin;
